@@ -12,7 +12,7 @@ $ pip install requirements.txt
 `If spacy is installed the following is important for spacy english language usage`
 $ python -m spacy download en_core_web_sm
 
-`(English language usage with spacy as small for load time, quantities can vary, there are larger datasets)`
+`(English dataset en_core_web_sm for spacy is small for load time mainly, quantities can vary, there are larger datasets)`
 
 ## Starting the app
 
