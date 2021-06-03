@@ -9,7 +9,7 @@ $ pip install requirements.txt
 `To reduce you can reduce`
 `pip install (each): streamlit, spacy, gensim, sumy`
 `i.e pip install streamlit`
-`If spacy is installed the following is important space usage`
+`If spacy is installed the following is important for spacy english language usage`
 $ python -m spacy download en_core_web_sm
 
 `(English language usage with spacy as small for load time, quantities can vary, there are larger datasets)`
