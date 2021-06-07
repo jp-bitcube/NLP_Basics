@@ -60,7 +60,7 @@ def main():
                 st.json(nlp_result)
 
         # Named Entities
-        if st.checkbox("Show Displacy"):
+        if st.checkbox("Show Entities"):
             st.subheader("Named Entity Recognition with Spacy")
             message = st.text_area("Entities", "")
             if st.button("Extract"):
@@ -68,14 +68,6 @@ def main():
                 html = displacy.render(doc, style="ent")
                 html = html.replace("\n\n","\n")
                 st.write(HTML_WRAPPER.format(html), unsafe_allow_html=True)
-        
-        # Named Entities Raw
-        if st.checkbox("Show Named Entities"):
-            st.subheader("Extract Entities from your word, sentence or paragraph")
-            message = st.text_area("Entities Raw", "")
-            if st.button('Entities'):
-                nlp_result = entities_extracted(message)
-                st.json(nlp_result)
 
         # Text Summarisation
         if st.checkbox("Show Summarization"):
@@ -94,7 +86,6 @@ def main():
                     st.text('Using Gensim...')
                     summarize_result = summarize(translate_text(message, "en"))
                 st.success(summarize_result)
-
     
         st.sidebar.subheader('About App')
         st.sidebar.text('NLP Basics built with streamlit')
