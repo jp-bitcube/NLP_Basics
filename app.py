@@ -1,7 +1,7 @@
 # Supports so many graphs, mainly used for machine learning
 import streamlit as st
 
-# NLP basics
+# # NLP basics
 import spacy
 from spacy import displacy
 
@@ -21,6 +21,7 @@ def translate_text(doc, lang):
     text = translator.translate(doc, dest=f'{lang}')
     return text
 
+
 def summary_analyzer(doc):
     text = translate_text(doc, "en")
     parser = PlaintextParser.from_string(text, Tokenizer("english"))
@@ -30,10 +31,12 @@ def summary_analyzer(doc):
     result = ' '.join(summary_list)
     return result
 
+
 def text_analyzer(doc):
     doc = analyze_text(doc)
     tokens = [(f'Text: {token.text} Token Hash: {token.orth}, Lemma: {token.lemma_}, P.O.S: {token.pos_} ') for token in doc]
     return tokens
+
 
 # There are more comprehensive ways to extract even, train spacy to recognize your own entities
 def entities_extracted(doc):
@@ -44,6 +47,7 @@ def entities_extracted(doc):
 
 def analyze_text(text):
 	return nlp(text)
+
 
 # Runs StreamLit App
 def main():
@@ -90,7 +94,6 @@ def main():
         st.sidebar.subheader('About App')
         st.sidebar.text('NLP Basics built with streamlit')
         st.sidebar.info("Cudo's to Streamlit Team")
-
 
 
 if __name__ == '__main__':
