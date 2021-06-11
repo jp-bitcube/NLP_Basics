@@ -6,13 +6,12 @@ from spacy.matcher import Matcher, PhraseMatcher
 from spacy.lang.en import English
 from spacy.language import Language
 
-nlp = spacy.load('en_core_web_sm')
+nlp = spacy.load('en_core_web_lg')
 
 def analyze_text(text):
 	return nlp(text)
 
-
-# # Basic Lexical Properties of spacy model # # #
+# # # Basic Lexical Properties of spacy model # # #
 
 # doc = nlp('It costs $5.')
 # print("Index: ", [token.i for token in doc])
@@ -22,19 +21,17 @@ def analyze_text(text):
 # print("is_punct: ", [token.is_punct for token in doc])
 # print("like_num: ", [token.like_num for token in doc])
 
-
 # # # Explain Spacy Labels # # #
 
 # print(spacy.explain('GPE'))
-# print(spacy.explain('NNP'))
-# print(spacy.explain('nsubj'))
-
+# print(spacy.explain('DET'))
+# print(spacy.explain('OP'))
 
 # # # Linguistic Features # # #
 # doc = nlp('She ate the pizza!')
 
 # for token in doc:
-#     # he part-of-speech tag of the token head.
+#     # The part-of-speech tag of the token head.
 #     print('Part of speech', token.text, '-->', token.pos_)
 #     # The syntactic relation connecting child to head.
 #     print('Dependency parser', token.text, '-->', token.dep_)
@@ -48,156 +45,115 @@ def analyze_text(text):
 # for ent in doc.ents:
 #     print(ent.text, '-->', ent.label_)
 
+### LEMMA ###
 
 # # # Matcher Patterns # # #
-# pattern = [
-#     {'IS_DIGIT': True},
-#     {'LOWER': 'fifa'},
-#     {'LOWER': 'world'},
-#     {'LOWER': 'cup'},
-#     {'IS_PUNCT': True},
-# ]
-# pattern1 = [{'TEXT': 'iPhone'}, {'TEXT': 'X'}]
-# pattern2 = [{'LOWER': 'iphone'}, {'LOWER': 'x'}]
-# pattern3 = [
-#     {'LEMMA': 'buy'},
-#     {'POS': 'DET', 'OP': '?'},  # Optional: matches 0 - 1 times
-#     {'POS': 'NOUN'}
-# ]
-# pattern4 = [
-#     {'LEMMA': 'love', 'POS': 'VERB'},
-#     {'POS': 'NOUN'}
-# ]
+matcher = Matcher(nlp.vocab)
+
+def sportsPatterns(sport):
+	return [
+		{'IS_DIGIT': True},
+		{'LOWER': f'{sport}', 'OP': '?'},
+		{'LOWER': 'world'},
+		{'LOWER': 'cup'},
+		{'IS_PUNCT': True},
+	]
+
+
+def emotionPatterns(emotion):
+	return [
+		{'LEMMA': f'{emotion}', 'POS': 'VERB'},
+	]
+
+
+def gadjetsPatterns(gadget, extensionName):
+	return [
+		{'LOWER': f'{gadget}'}, 
+		{'LOWER': f'{extensionName}', 'OP': '?'}
+	]
+
+
+fifa = sportsPatterns(sport='fifa')
+rugby = sportsPatterns(sport='rugby')
+
+love = emotionPatterns(emotion='love')
+hate = emotionPatterns(emotion='hate')
+
+phone = gadjetsPatterns(gadget='iphone', extensionName='x')
+computer = gadjetsPatterns(gadget='mac', extensionName='proo')
+
 
 # # # Using The Matcher # # #
+# Fix Add 2 sets matchers
 
-# matcher = Matcher(nlp.vocab)
-# matcher.add("PATTERN_NAME", [pattern, pattern1, pattern2, pattern3, pattern4])
-# # doc = nlp('Upcoming iPhone X, has leaked the release date')
-# # doc2 = nlp('2018 FIFA world cup: France won!')
-# # doc3 = nlp('I loved dogs now I love cats more')
-# doc4 = nlp('I have bought a smart phone. now I\'m buying apps')
+def add_matchers(matcher):
+	matcher.add("World_Cups", [fifa, rugby]);
+	matcher.add("Emotion", [love, hate]);
+	matcher.add("Gadgets", [phone, computer]);
 
-# matches = matcher(doc4)
-# for match_id, start, end in matches:
-#     string_id = nlp.vocab.strings[match_id]  # Get string representation
-#     span = doc4[start:end]  # The matched span
-#     print(match_id, string_id, start, end, span.text)
 
-# # #  StringStore  # # #
+add_matchers(matcher)
 
-# coffee_hash = nlp.vocab.strings["coffee"]
-# coffee_string = nlp.vocab.strings[coffee_hash]
 
-# print(coffee_string, coffee_hash)
 
-# #  Lexemes  # # #
+def showMatcher(doc):
+	matches = matcher(doc)
+	for match_id, start, end in matches:
+		string_id = nlp.vocab.strings[match_id]  # Get string representation of matcher
+		span = doc[start:end]  # The matched span
+		print(
+			f"""match_id: {match_id},
+string_id: {string_id},
+start: {start},
+end: {end},
+TEXT: {span.text}
+		""")
 
-doc = nlp('I love coffee')
-lexeme = nlp.vocab["coffee"]
+def showRepresentationOfMatchers():
+	doc = nlp('Upcoming Mac Pro, has leaked the release date')
+	doc2 = nlp('2018 FIFA world cup: France won!')
+	doc3 = nlp('I loved dogs now I love cats more')
+	doc4 = nlp('I hate tomatoes')
+	showMatcher(doc)
+	showMatcher(doc2)
+	showMatcher(doc3)
+	showMatcher(doc4)
 
-print(lexeme.text, lexeme.orth, lexeme.is_alpha)
 
-# # #  Doc Object and Span object  # # #
+showRepresentationOfMatchers()
 
-# model = English()
 
-# words = ['Hello', 'World', '!']
-# spaces = [True, False, False]
+# # # Efficient Phrase Matcher # # #
 
-# # Creating a doc manually
-# doc = Doc(model.vocab, words=words, spaces=spaces)
+matcher = PhraseMatcher(nlp.vocab)
+pattern = nlp('Golden Retriever')
+pattern2 = nlp('Golden Retriever')
+matcher.add('DOG', [pattern, pattern2])
+doc = nlp("I have a Golden Retriever")
 
-# span = Span(doc, 0, 2)
-
-# span_with_label = Span(doc, 0, 2, label="GREETING")
-
-# doc.ents = [span_with_label]
-
-# print(doc.ents)
+for match_id, start, end in matcher(doc):
+    span = doc[start:end]
+    print('Matched phrase: ', span.text)
 
 # # # Similarity # # #
 
 # # 2 documents
 # doc1 = nlp('I like fast food')
 # doc2 = nlp('I love pizza')
-# print(doc1.similarity(doc2))
+# print(f"{round(doc1.similarity(doc2) * 100, 2)}%")
 
-# # 2 tokens
+# # # 2 tokens
 # doc = nlp('I like pizza and pasta')
-# print(doc[2].similarity(doc[4]))
+# print(f"{round(doc[2].similarity(doc[4]) * 100, 2)}%")
 
-# # document and token
+# # # document and token
 # d = nlp('I love pizza')
 # t = nlp('soap')[0]
 
-# print(d.similarity(t))
+# print(f"{round(d.similarity(t) * 100, 2)}%")
 
 # # span and document
 # span = nlp('I like pizza and pasta')[2: 5]
-# document = nlp('MacDonalds sells burgers')
+# document = nlp('MacDonald\'s sells burgers')
 
-# print(span.similarity(document))
-# # Vectors
-# print(document[2].vector)
-
-# # # Adding Statistical predictions # # #
-
-# matcher = Matcher(nlp.vocab)
-# pattern = [
-#     {'LOWER': 'golden'},
-#     {'LOWER': 'retriever'},
-# ]
-# matcher.add('DOG', [pattern])
-# doc = nlp("I have a Golden Retriever")
-
-# for match_id, start, end in matcher(doc):
-#     span = doc[start:end]
-#     print('Matched Span: ', span.text)
-#     # Get the span root token and root head
-#     print('Root token: ', span.root.text)
-#     print('Root head: ', span.root.head.text)
-#     # Get the previous token and its POS tag
-#     print("Previous token: ", doc[start-1].text, doc[start-1].pos_)
-
-# # # Efficient Phrase Matcher # # #
-
-# matcher = PhraseMatcher(nlp.vocab)
-# pattern = nlp('Golden Retriever')
-# matcher.add('DOG', [pattern])
-# doc = nlp("I have a Golden Retriever")
-
-# for match_id, start, end in matcher(doc):
-#     span = doc[start:end]
-#     print('Matched phrase: ', span.text)
-
-# # # Pipeline attributes # # #
-
-# print(nlp.pipe_names)
-# print(nlp.pipeline)
-
-# # # Simple Custom Pipeline Component # # #
-
-# @Language.component("length")
-# def custom_component(doc):
-#     print('DOC LENGTH: ', len(doc))
-#     return doc
-
-
-# nlp.add_pipe('length', first=True)
-# d = nlp("This is a sentence.")
-
-# print('Pipelines', nlp.pipe_names, d)
-
-# def has_token(doc, token_text):
-#     in_doc = token_text in [token.text for token in doc]
-#     return in_doc
-
-
-# Doc.set_extension('has_token', method=has_token)
-
-
-# doc = nlp("The sky is Blue, the sky is magnificent, and the word colour in South Africa and English is correct. Only coding we drop the 'u'")
-
-# print(doc._.has_token("blue"), '--> blue')
-# print(doc._.has_token("color"), '--> color')
+# print(f"{round(span.similarity(document) * 100, 2)}%")
