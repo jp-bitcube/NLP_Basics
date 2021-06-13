@@ -1,22 +1,3 @@
-# import random
-# import spacy
-# import spacy
-# from spacy.matcher import Matcher, PhraseMatcher
-# from spacy.lang.en import English
-# from spacy.language import Language
-
-# nlp = spacy.load('en_core_web_lg')
-
-# def analyze_text(text):
-# 	return nlp(text)
-
-# # # Basic Token Lexical Properties # # #
-# # key -> is the property ie. token.orth looping returning an Array
-# def tokenizeWord(key):
-# 	return [token[key] for token in doc]
-
-
-# doc = analyze_text('It costs $1 million.')
 # print("Index: ", [token.i for token in doc])
 # print("Orth:", [token.orth for token in doc]) 
 # print("Text: ", tokenizeWord('text')) 
